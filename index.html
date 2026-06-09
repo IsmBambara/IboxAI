@@ -9,155 +9,81 @@
 <meta name="theme-color" content="#534AB7">
 <title>InboxAI by Clovis</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root {
-    --purple: #534AB7;
-    --purple-light: #EEEDFE;
-    --purple-mid: #CECBF6;
-    --purple-dark: #3C3489;
-    --bg: #F5F4F8;
-    --surface: #FFFFFF;
-    --surface2: #F1F0F6;
-    --text: #1A1A2E;
-    --text2: #6B6880;
-    --text3: #A09DB8;
+    --purple: #534AB7; --purple-light: #EEEDFE; --purple-dark: #3C3489;
+    --bg: #F5F4F8; --surface: #FFFFFF; --surface2: #F1F0F6;
+    --text: #1A1A2E; --text2: #6B6880; --text3: #A09DB8;
     --border: rgba(83,74,183,0.12);
-    --red: #E24B4A;
-    --red-bg: #FCEBEB;
-    --red-text: #A32D2D;
-    --green: #3B6D11;
-    --green-bg: #EAF3DE;
-    --amber: #854F0B;
-    --amber-bg: #FAEEDA;
-    --radius: 12px;
-    --radius-sm: 8px;
+    --red: #E24B4A; --red-bg: #FCEBEB; --red-text: #A32D2D;
+    --green: #3B6D11; --green-bg: #EAF3DE;
+    --amber: #854F0B; --amber-bg: #FAEEDA;
+    --radius: 12px; --radius-sm: 8px;
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #0F0E1A;
-      --surface: #1A1829;
-      --surface2: #242238;
-      --text: #F0EEF8;
-      --text2: #9895B0;
-      --text3: #5C5A6E;
-      --border: rgba(200,195,246,0.1);
-      --purple-light: #2A2650;
+      --bg: #0F0E1A; --surface: #1A1829; --surface2: #242238;
+      --text: #F0EEF8; --text2: #9895B0; --text3: #5C5A6E;
+      --border: rgba(200,195,246,0.1); --purple-light: #2A2650;
     }
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); overflow: hidden; }
-
-  /* SPLASH */
-  #splash {
-    position: fixed; inset: 0; background: var(--purple);
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
-    z-index: 100; transition: opacity 0.4s;
-  }
-  #splash .splash-icon { font-size: 56px; color: white; }
-  #splash .splash-title { font-size: 28px; font-weight: 700; color: white; letter-spacing: -0.5px; }
-  #splash .splash-sub { font-size: 14px; color: rgba(255,255,255,0.6); }
-  #splash .spinner { width: 28px; height: 28px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; margin-top: 8px; }
-
-  /* APP SHELL */
-  #app { height: 100%; display: flex; flex-direction: column; }
-
-  /* HEADER */
-  .header {
-    background: var(--surface);
-    border-bottom: 0.5px solid var(--border);
-    padding: 52px 20px 14px;
-    display: flex; align-items: center; gap: 12px;
-  }
+  #splash { position: fixed; inset: 0; background: var(--purple); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; z-index: 100; transition: opacity 0.4s; }
+  .splash-icon { font-size: 56px; color: white; }
+  .splash-title { font-size: 28px; font-weight: 700; color: white; letter-spacing: -0.5px; }
+  .splash-sub { font-size: 14px; color: rgba(255,255,255,0.6); }
+  .spinner { width: 28px; height: 28px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; margin-top: 8px; }
+  #login-screen { position: fixed; inset: 0; background: var(--bg); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 0; z-index: 90; padding: 32px; }
+  .login-logo { font-size: 48px; color: var(--purple); margin-bottom: 16px; }
+  .login-title { font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; margin-bottom: 6px; text-align: center; }
+  .login-sub { font-size: 14px; color: var(--text2); text-align: center; margin-bottom: 40px; line-height: 1.6; }
+  .login-card { background: var(--surface); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 28px 24px; width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 16px; }
+  .login-card-title { font-size: 15px; font-weight: 600; color: var(--text); text-align: center; }
+  .google-btn { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 20px; border-radius: var(--radius-sm); border: 0.5px solid var(--border); background: var(--surface); color: var(--text); font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.15s; width: 100%; }
+  .google-btn:active { background: var(--surface2); }
+  .google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+  .login-note { font-size: 12px; color: var(--text3); text-align: center; line-height: 1.5; }
+  #app { height: 100%; display: flex; flex-direction: column; display: none; }
+  .header { background: var(--surface); border-bottom: 0.5px solid var(--border); padding: 52px 20px 14px; display: flex; align-items: center; gap: 12px; }
   .header-logo { display: flex; align-items: center; gap: 8px; flex: 1; }
   .header-logo i { font-size: 22px; color: var(--purple); }
   .header-logo span { font-size: 18px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
-  .header-actions { display: flex; gap: 8px; }
-  .icon-btn {
-    width: 36px; height: 36px; border-radius: var(--radius-sm);
-    background: var(--surface2); border: none; display: flex; align-items: center; justify-content: center;
-    color: var(--text2); font-size: 18px; cursor: pointer;
-  }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .user-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 2px solid var(--purple-light); }
+  .user-avatar-placeholder { width: 32px; height: 32px; border-radius: 50%; background: var(--purple-light); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--purple); }
+  .icon-btn { width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--surface2); border: none; display: flex; align-items: center; justify-content: center; color: var(--text2); font-size: 18px; cursor: pointer; }
   .icon-btn.accent { background: var(--purple-light); color: var(--purple); }
-
-  /* TABS */
-  .tabs {
-    background: var(--surface);
-    display: flex; border-bottom: 0.5px solid var(--border);
-    padding: 0 12px; gap: 4px;
-    overflow-x: auto; -webkit-overflow-scrolling: touch;
-  }
+  .tabs { background: var(--surface); display: flex; border-bottom: 0.5px solid var(--border); padding: 0 12px; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .tabs::-webkit-scrollbar { display: none; }
-  .tab {
-    display: flex; align-items: center; gap: 6px;
-    padding: 10px 14px; font-size: 13px; font-weight: 500;
-    color: var(--text2); border-bottom: 2px solid transparent;
-    cursor: pointer; white-space: nowrap; border-radius: 0;
-    background: none; border-top: none; border-left: none; border-right: none;
-  }
+  .tab { display: flex; align-items: center; gap: 6px; padding: 10px 14px; font-size: 13px; font-weight: 500; color: var(--text2); border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; background: none; border-top: none; border-left: none; border-right: none; }
   .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
   .tab i { font-size: 16px; }
-  .tab .tab-badge {
-    background: var(--purple); color: white;
-    font-size: 10px; padding: 1px 6px; border-radius: 20px;
-  }
-  .tab .tab-badge.red { background: var(--red); }
-
-  /* CONTENT */
-  .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 16px; padding-bottom: calc(16px + var(--safe-bottom)); }
-
-  /* STATS */
+  .tab-badge { background: var(--purple); color: white; font-size: 10px; padding: 1px 6px; border-radius: 20px; }
+  .content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px; padding-bottom: calc(16px + var(--safe-bottom)); }
   .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
-  .stat-card {
-    background: var(--surface); border-radius: var(--radius);
-    padding: 14px 16px; border: 0.5px solid var(--border);
-  }
+  .stat-card { background: var(--surface); border-radius: var(--radius); padding: 14px 16px; border: 0.5px solid var(--border); }
   .stat-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
   .stat-value { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -1px; }
   .stat-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
-
-  /* RECAP CARD */
-  .recap-card {
-    background: var(--purple); border-radius: var(--radius);
-    padding: 18px 18px; margin-bottom: 16px; position: relative; overflow: hidden;
-  }
-  .recap-card::before {
-    content: ''; position: absolute; top: -20px; right: -20px;
-    width: 100px; height: 100px; border-radius: 50%;
-    background: rgba(255,255,255,0.07);
-  }
+  .recap-card { background: var(--purple); border-radius: var(--radius); padding: 18px; margin-bottom: 16px; position: relative; overflow: hidden; }
+  .recap-card::before { content: ''; position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; border-radius: 50%; background: rgba(255,255,255,0.07); }
   .recap-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .recap-card-header i { font-size: 20px; color: rgba(255,255,255,0.9); }
   .recap-card-title { font-size: 14px; font-weight: 600; color: white; }
   .recap-card-date { font-size: 11px; color: rgba(255,255,255,0.55); }
   .recap-card-body { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.6; }
   .recap-card-body strong { color: white; font-weight: 600; }
-  .recap-cta {
-    display: inline-flex; align-items: center; gap: 6px;
-    margin-top: 12px; padding: 8px 16px; border-radius: var(--radius-sm);
-    background: rgba(255,255,255,0.15); color: white; font-size: 13px; font-weight: 500;
-    border: none; cursor: pointer;
-  }
-
-  /* SECTION */
+  .recap-cta { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px 16px; border-radius: var(--radius-sm); background: rgba(255,255,255,0.15); color: white; font-size: 13px; font-weight: 500; border: none; cursor: pointer; }
   .section-title { font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
   .section-title i { font-size: 15px; color: var(--purple); }
-
-  /* EMAIL LIST */
   .email-list { display: flex; flex-direction: column; gap: 2px; background: var(--surface); border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; }
-  .email-row {
-    display: flex; align-items: center; gap: 12px; padding: 12px 14px;
-    border-bottom: 0.5px solid var(--border); cursor: pointer;
-    transition: background 0.1s; background: var(--surface);
-  }
+  .email-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 0.5px solid var(--border); cursor: pointer; transition: background 0.1s; }
   .email-row:last-child { border-bottom: none; }
   .email-row:active { background: var(--surface2); }
-  .email-row.unread { background: var(--surface); }
-  .avatar {
-    width: 38px; height: 38px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 13px; font-weight: 600; flex-shrink: 0;
-  }
+  .avatar { width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; flex-shrink: 0; }
   .email-info { flex: 1; min-width: 0; }
   .email-from { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
   .email-subject { font-size: 13px; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -168,89 +94,37 @@
   .tag.pro { background: var(--purple-light); color: var(--purple); }
   .tag.promo { background: var(--green-bg); color: var(--green); }
   .tag.perso { background: var(--amber-bg); color: var(--amber); }
-
-  /* EMPTY STATE */
   .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
   .empty-state i { font-size: 40px; display: block; margin-bottom: 12px; }
   .empty-state p { font-size: 14px; line-height: 1.6; }
-
-  /* CALENDAR */
-  .cal-card {
-    background: var(--surface); border-radius: var(--radius);
-    border: 0.5px solid var(--border); overflow: hidden; margin-bottom: 12px;
-  }
+  .cal-card { background: var(--surface); border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; margin-bottom: 12px; }
   .cal-event { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 0.5px solid var(--border); }
   .cal-event:last-child { border-bottom: none; }
   .cal-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--purple); flex-shrink: 0; }
   .cal-event-name { font-size: 14px; font-weight: 500; color: var(--text); }
   .cal-event-time { font-size: 12px; color: var(--text2); }
-
-  /* SETTINGS */
   .settings-group { background: var(--surface); border-radius: var(--radius); border: 0.5px solid var(--border); overflow: hidden; margin-bottom: 16px; }
-  .settings-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 0.5px solid var(--border); cursor: pointer; }
+  .settings-row { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 0.5px solid var(--border); }
   .settings-row:last-child { border-bottom: none; }
-  .settings-row:active { background: var(--surface2); }
   .settings-icon { width: 32px; height: 32px; border-radius: var(--radius-sm); background: var(--purple-light); display: flex; align-items: center; justify-content: center; }
   .settings-icon i { font-size: 17px; color: var(--purple); }
   .settings-label { flex: 1; font-size: 14px; color: var(--text); }
-  .settings-chevron { color: var(--text3); font-size: 16px; }
-  .settings-toggle {
-    width: 44px; height: 26px; border-radius: 13px; background: var(--purple);
-    position: relative; cursor: pointer; border: none;
-  }
-  .settings-toggle::after {
-    content: ''; position: absolute; top: 3px; right: 3px;
-    width: 20px; height: 20px; border-radius: 50%; background: white;
-    transition: transform 0.2s;
-  }
+  .settings-toggle { width: 44px; height: 26px; border-radius: 13px; background: var(--purple); position: relative; cursor: pointer; border: none; }
+  .settings-toggle::after { content: ''; position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; border-radius: 50%; background: white; transition: transform 0.2s; }
   .settings-toggle.off { background: var(--text3); }
   .settings-toggle.off::after { transform: translateX(-18px); }
-
-  /* LOADING */
+  .logout-btn { width: 100%; padding: 14px; border-radius: var(--radius); font-size: 15px; font-weight: 600; border: none; cursor: pointer; background: var(--red-bg); color: var(--red-text); margin-top: 8px; }
   .loading-inline { display: flex; align-items: center; gap: 10px; padding: 20px; color: var(--text2); font-size: 13px; justify-content: center; }
   .spinner-sm { width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--purple); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* BOTTOM NAV */
-  .bottom-nav {
-    background: var(--surface); border-top: 0.5px solid var(--border);
-    display: flex; padding: 8px 0; padding-bottom: calc(8px + var(--safe-bottom));
-  }
-  .nav-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px;
-    padding: 6px 4px; cursor: pointer; position: relative;
-    border: none; background: none;
-  }
-  .nav-item i { font-size: 22px; color: var(--text3); }
-  .nav-item span { font-size: 10px; color: var(--text3); }
-  .nav-item.active i { color: var(--purple); }
-  .nav-item.active span { color: var(--purple); }
-  .nav-badge {
-    position: absolute; top: 4px; right: calc(50% - 18px);
-    background: var(--red); color: white; font-size: 9px;
-    padding: 1px 5px; border-radius: 20px; font-weight: 600;
-  }
-
-  /* MODALS */
-  .modal-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50;
-    display: none; align-items: flex-end;
-  }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; display: none; align-items: flex-end; }
   .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--surface); border-radius: 20px 20px 0 0;
-    width: 100%; padding: 20px 20px calc(20px + var(--safe-bottom));
-    max-height: 80vh; overflow-y: auto;
-  }
+  .modal { background: var(--surface); border-radius: 20px 20px 0 0; width: 100%; padding: 20px 20px calc(20px + var(--safe-bottom)); max-height: 80vh; overflow-y: auto; }
   .modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 0 auto 16px; }
   .modal-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 16px; }
   .modal-body { font-size: 14px; color: var(--text2); line-height: 1.7; }
   .modal-body strong { color: var(--text); font-weight: 600; }
-
-  .btn-full {
-    width: 100%; padding: 14px; border-radius: var(--radius); font-size: 15px; font-weight: 600;
-    border: none; cursor: pointer; margin-top: 12px;
-  }
+  .btn-full { width: 100%; padding: 14px; border-radius: var(--radius); font-size: 15px; font-weight: 600; border: none; cursor: pointer; margin-top: 12px; }
   .btn-purple { background: var(--purple); color: white; }
   .btn-ghost { background: var(--surface2); color: var(--text); }
 </style>
@@ -264,84 +138,67 @@
   <div class="spinner"></div>
 </div>
 
-<div id="app" style="display:none">
+<div id="login-screen">
+  <i class="ti ti-inbox login-logo"></i>
+  <div class="login-title">InboxAI by Clovis</div>
+  <div class="login-sub">Connecte ton compte Google pour accéder à tes emails, agenda et fichiers.</div>
+  <div class="login-card">
+    <div class="login-card-title">Connexion</div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.31-8.16 2.31-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/><path fill="none" d="M0 0h48v48H0z"/></svg>
+      Continuer avec Google
+    </button>
+    <div class="login-note">Tes données restent privées. L'app accède uniquement à tes emails et agenda.</div>
+  </div>
+</div>
+
+<div id="app">
   <div class="header">
     <div class="header-logo">
       <i class="ti ti-inbox"></i>
       <span>InboxAI <span style="font-weight:400;color:var(--text2);font-size:14px;">by Clovis</span></span>
     </div>
     <div class="header-actions">
-      <button class="icon-btn" onclick="refreshAll()" title="Actualiser">
-        <i class="ti ti-refresh"></i>
-      </button>
-      <button class="icon-btn accent" onclick="openRecapModal()" title="Récap IA">
-        <i class="ti ti-sparkles"></i>
-      </button>
+      <button class="icon-btn" onclick="refreshAll()"><i class="ti ti-refresh"></i></button>
+      <button class="icon-btn accent" onclick="openRecapModal()"><i class="ti ti-sparkles"></i></button>
+      <div id="user-avatar-container"></div>
     </div>
   </div>
-
-  <div class="tabs" id="tabs">
-    <button class="tab active" onclick="switchTab('dashboard',this)">
-      <i class="ti ti-layout-dashboard"></i> Dashboard
-    </button>
-    <button class="tab" onclick="switchTab('emails',this)">
-      <i class="ti ti-mail"></i> Emails
-      <span class="tab-badge" id="tab-badge-emails">—</span>
-    </button>
-    <button class="tab" onclick="switchTab('calendar',this)">
-      <i class="ti ti-calendar"></i> Agenda
-    </button>
-    <button class="tab" onclick="switchTab('settings',this)">
-      <i class="ti ti-settings"></i> Réglages
-    </button>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('dashboard',this)"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
+    <button class="tab" onclick="switchTab('emails',this)"><i class="ti ti-mail"></i> Emails <span class="tab-badge" id="tab-badge-emails">0</span></button>
+    <button class="tab" onclick="switchTab('calendar',this)"><i class="ti ti-calendar"></i> Agenda</button>
+    <button class="tab" onclick="switchTab('settings',this)"><i class="ti ti-settings"></i> Réglages</button>
   </div>
-
   <div class="content" id="content"></div>
 </div>
 
-<!-- MODAL RECAP -->
 <div class="modal-overlay" id="recap-modal" onclick="closeRecapModal(event)">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title">✨ Récap IA du jour</div>
-    <div class="modal-body" id="recap-modal-body">
-      <div class="loading-inline"><div class="spinner-sm"></div> Génération en cours...</div>
-    </div>
+    <div class="modal-body" id="recap-modal-body"></div>
     <button class="btn-full btn-ghost" onclick="closeRecapModal()">Fermer</button>
   </div>
 </div>
 
-<!-- MODAL EMAIL -->
 <div class="modal-overlay" id="email-modal" onclick="closeEmailModal(event)">
   <div class="modal">
     <div class="modal-handle"></div>
     <div class="modal-title" id="email-modal-title">Email</div>
     <div class="modal-body" id="email-modal-body"></div>
-    <button class="btn-full btn-purple" id="email-modal-reply" style="margin-top:12px">
-      <i class="ti ti-send" style="margin-right:6px"></i> Répondre par IA
-    </button>
+    <button class="btn-full btn-purple" id="email-modal-reply"><i class="ti ti-send" style="margin-right:6px"></i> Ouvrir dans Gmail</button>
     <button class="btn-full btn-ghost" onclick="closeEmailModal()">Fermer</button>
   </div>
 </div>
 
 <script>
-const GMAIL_MCP = "https://gmailmcp.googleapis.com/mcp/v1";
-const CAL_MCP = "https://calendarmcp.googleapis.com/mcp/v1";
-let state = { emails: [], events: [], currentTab: 'dashboard', loaded: false };
-
-const AVATAR_COLORS = [
-  {bg:'#EEEDFE',c:'#534AB7'},{bg:'#E1F5EE',c:'#0F6E56'},
-  {bg:'#FAECE7',c:'#993C1D'},{bg:'#E6F1FB',c:'#185FA5'},
-  {bg:'#FAEEDA',c:'#854F0B'},{bg:'#EAF3DE',c:'#3B6D11'}
-];
-
-function initials(name) {
-  return (name||'?').split(/[\s@<>]+/).filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?';
-}
-function avatarHTML(name, idx) {
-  const c = AVATAR_COLORS[(idx||0) % AVATAR_COLORS.length];
-  return `<div class="avatar" style="background:${c.bg};color:${c.c}">${initials(name)}</div>`;
-}
+const CLIENT_ID = '322785652939-6rhef2cf231rt3i13l7icrp20oojce9q.apps.googleusercontent.com';
+const SCOPES = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/calendar.readonly profile email';
+let state = { emails: [], events: [], currentTab: 'dashboard', accessToken: null, userInfo: null };
+const AVATAR_COLORS = [{bg:'#EEEDFE',c:'#534AB7'},{bg:'#E1F5EE',c:'#0F6E56'},{bg:'#FAECE7',c:'#993C1D'},{bg:'#E6F1FB',c:'#185FA5'},{bg:'#FAEEDA',c:'#854F0B'},{bg:'#EAF3DE',c:'#3B6D11'}];
+function initials(name) { return (name||'?').split(/[\s@<>]+/).filter(Boolean).map(w=>w[0]).join('').toUpperCase().slice(0,2)||'?'; }
+function avatarHTML(name, idx) { const c = AVATAR_COLORS[(idx||0)%AVATAR_COLORS.length]; return `<div class="avatar" style="background:${c.bg};color:${c.c}">${initials(name)}</div>`; }
 function classify(subject, from) {
   const s = (subject+' '+from).toLowerCase();
   if (/urgent|important|action requise|rappel/.test(s)) return 'urgent';
@@ -349,345 +206,147 @@ function classify(subject, from) {
   if (/facture|devis|réunion|meeting|projet|contrat|invoice/.test(s)) return 'pro';
   return 'perso';
 }
-function tagHTML(cat) {
-  const labels = {urgent:'Urgent',pro:'Pro',promo:'Promo',perso:'Perso'};
-  return `<span class="tag ${cat}">${labels[cat]||cat}</span>`;
-}
+function tagHTML(cat) { const l={urgent:'Urgent',pro:'Pro',promo:'Promo',perso:'Perso'}; return `<span class="tag ${cat}">${l[cat]||cat}</span>`; }
 function timeAgo(ds) {
   if (!ds) return '';
-  const d = new Date(ds), now = new Date();
-  const m = Math.floor((now-d)/60000);
-  if (m < 1) return 'maintenant';
-  if (m < 60) return `${m}min`;
-  if (m < 1440) return `${Math.floor(m/60)}h`;
+  const d=new Date(ds),now=new Date(),m=Math.floor((now-d)/60000);
+  if (m<1) return 'maintenant'; if (m<60) return `${m}min`; if (m<1440) return `${Math.floor(m/60)}h`;
   return d.toLocaleDateString('fr-FR',{day:'numeric',month:'short'});
 }
-
-async function callAPI(prompt, mcps) {
-  const body = {
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 1000,
-    messages: [{role:"user", content: prompt}]
-  };
-  if (mcps && mcps.length) body.mcp_servers = mcps;
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify(body)
-  });
-  return await res.json();
-}
-
-function parseThreads(data) {
-  for (const b of (data.content||[])) {
-    if (b.type === 'mcp_tool_result') {
-      try {
-        const raw = b.content?.[0]?.text||'';
-        const p = JSON.parse(raw);
-        const list = p.threads||p.messages||p.data||[];
-        if (list.length) return list.map(t=>({
-          id: t.id||t.threadId||Math.random(),
-          from: t.from||t.sender||'Inconnu',
-          subject: t.subject||t.snippet||'(sans objet)',
-          date: t.date||t.receivedAt||null,
-          unread: t.unread !== false,
-          snippet: t.snippet||''
-        }));
-      } catch {}
-    }
-  }
-  const texts = (data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('\n');
-  const matches = texts.match(/\d+\s+email/i);
-  return [];
-}
-
-async function loadEmails() {
-  try {
-    const data = await callAPI(
-      "List my 10 most recent Gmail threads. Return ONLY a JSON object like: {\"threads\":[{\"id\":\"...\",\"from\":\"name <email>\",\"subject\":\"...\",\"date\":\"ISO8601\",\"unread\":true,\"snippet\":\"...\"}]}. No markdown, no explanation.",
-      [{type:"url",url:GMAIL_MCP,name:"gmail"}]
-    );
-    return parseThreads(data);
-  } catch { return []; }
-}
-
-async function loadEvents() {
-  try {
-    const data = await callAPI(
-      "List my next 5 Google Calendar events. Return ONLY JSON: {\"events\":[{\"name\":\"...\",\"date\":\"ISO8601\",\"duration\":\"1h\"}]}. No markdown.",
-      [{type:"url",url:CAL_MCP,name:"calendar"}]
-    );
-    for (const b of (data.content||[])) {
-      if (b.type==='mcp_tool_result') {
-        try {
-          const p = JSON.parse(b.content?.[0]?.text||'{}');
-          return p.events||[];
-        } catch {}
+function signInWithGoogle() {
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID, scope: SCOPES,
+    callback: async (resp) => {
+      if (resp.access_token) {
+        state.accessToken = resp.access_token;
+        localStorage.setItem('gtoken', resp.access_token);
+        await fetchUserInfo(); showApp(); await loadAllData();
       }
     }
-    return [];
+  });
+  client.requestAccessToken();
+}
+async function fetchUserInfo() {
+  try {
+    const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', { headers: { Authorization: `Bearer ${state.accessToken}` } });
+    state.userInfo = await res.json();
+    const container = document.getElementById('user-avatar-container');
+    if (state.userInfo.picture) container.innerHTML = `<img src="${state.userInfo.picture}" class="user-avatar" alt="profil">`;
+    else container.innerHTML = `<div class="user-avatar-placeholder">${initials(state.userInfo.name||state.userInfo.email)}</div>`;
+  } catch {}
+}
+async function loadEmails() {
+  if (!state.accessToken) return [];
+  try {
+    const listRes = await fetch('https://gmail.googleapis.com/gmail/v1/users/me/messages?maxResults=15&labelIds=INBOX', { headers: { Authorization: `Bearer ${state.accessToken}` } });
+    const listData = await listRes.json();
+    if (!listData.messages) return [];
+    return await Promise.all(listData.messages.slice(0,10).map(async m => {
+      const msgRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`, { headers: { Authorization: `Bearer ${state.accessToken}` } });
+      const msg = await msgRes.json();
+      const headers = msg.payload?.headers||[];
+      const get = name => headers.find(h=>h.name===name)?.value||'';
+      return { id: m.id, from: get('From'), subject: get('Subject')||'(sans objet)', date: get('Date'), unread: (msg.labelIds||[]).includes('UNREAD'), snippet: msg.snippet||'' };
+    }));
   } catch { return []; }
 }
-
-async function generateRecap() {
-  const emails = state.emails;
-  if (!emails.length) return "Aucun email trouvé. Vérifie ta connexion Gmail.";
-  const urgent = emails.filter(e=>e.cat==='urgent');
-  const pro = emails.filter(e=>e.cat==='pro');
-  const promo = emails.filter(e=>e.cat==='promo');
-  const perso = emails.filter(e=>e.cat==='perso');
-  const unread = emails.filter(e=>e.unread);
-  let recap = `Tu as <strong>${unread.length} email${unread.length>1?'s':''} non lu${unread.length>1?'s':''}</strong> aujourd'hui.<br><br>`;
-  if (urgent.length) recap += `<strong>🔴 Urgents (${urgent.length}) :</strong> ${urgent.map(e=>`"${e.subject}" de ${e.from.split('<')[0].trim()}`).join(', ')}<br><br>`;
-  if (pro.length) recap += `<strong>💼 Pro (${pro.length}) :</strong> ${pro.map(e=>e.from.split('<')[0].trim()).join(', ')}<br><br>`;
-  if (promo.length) recap += `<strong>🏷️ Promos (${promo.length}) :</strong> ${promo.length} email${promo.length>1?'s':''} promotionnel${promo.length>1?'s':''} — tu peux les ignorer.<br><br>`;
-  if (perso.length) recap += `<strong>👤 Perso (${perso.length}) :</strong> ${perso.map(e=>e.from.split('<')[0].trim()).join(', ')}`;
-  return recap;
+async function loadEvents() {
+  if (!state.accessToken) return [];
+  try {
+    const now = new Date().toISOString();
+    const end = new Date(Date.now()+7*24*60*60*1000).toISOString();
+    const res = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events?timeMin=${now}&timeMax=${end}&maxResults=5&singleEvents=true&orderBy=startTime`, { headers: { Authorization: `Bearer ${state.accessToken}` } });
+    const data = await res.json();
+    return (data.items||[]).map(e=>({ name: e.summary||'Évènement', date: e.start?.dateTime||e.start?.date }));
+  } catch { return []; }
 }
-
-function renderDashboard() {
-  const emails = state.emails;
-  const classified = emails.map(e=>({...e, cat: classify(e.subject, e.from)}));
-  state.emails = classified;
-  const unread = classified.filter(e=>e.unread).length;
-  const urgent = classified.filter(e=>e.cat==='urgent').length;
-  const promo = classified.filter(e=>e.cat==='promo').length;
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
-
-  let recapText = emails.length
-    ? `Tu as <strong>${unread} email${unread>1?'s':''} non lu${unread>1?'s':''}</strong>, dont <strong>${urgent} urgent${urgent>1?'s':''}</strong> et <strong>${promo} promo${promo>1?'s':''}</strong>. Appuie sur "Récap complet" pour l'analyse IA.`
-    : `Connecte Gmail pour voir tes emails. Appuie sur ✨ pour démarrer.`;
-
-  const recentEmails = classified.slice(0,4);
-
-  return `
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Non lus</div>
-        <div class="stat-value">${unread||'—'}</div>
-        <div class="stat-sub">Aujourd'hui</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Urgents</div>
-        <div class="stat-value" style="color:var(--red)">${urgent||'0'}</div>
-        <div class="stat-sub">À traiter</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Promos</div>
-        <div class="stat-value" style="color:var(--green)">${promo||'0'}</div>
-        <div class="stat-sub">Classifiés auto</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Évènements</div>
-        <div class="stat-value" style="color:var(--purple)">${state.events.length||'—'}</div>
-        <div class="stat-sub">Cette semaine</div>
-      </div>
-    </div>
-
-    <div class="recap-card">
-      <div class="recap-card-header">
-        <i class="ti ti-sparkles"></i>
-        <div>
-          <div class="recap-card-title">Récap IA</div>
-          <div class="recap-card-date">${dateStr}</div>
-        </div>
-      </div>
-      <div class="recap-card-body">${recapText}</div>
-      <button class="recap-cta" onclick="openRecapModal()">
-        <i class="ti ti-sparkles"></i> Récap complet
-      </button>
-    </div>
-
-    <div class="section-title"><i class="ti ti-mail"></i> Emails récents</div>
-    ${recentEmails.length ? `<div class="email-list">${recentEmails.map((e,i)=>emailRowHTML(e,i)).join('')}</div>` : `<div class="empty-state"><i class="ti ti-mail-off"></i><p>Aucun email — connecte ton Gmail</p></div>`}
-
-    ${state.events.length ? `
-    <div class="section-title" style="margin-top:16px"><i class="ti ti-calendar"></i> Agenda</div>
-    <div class="cal-card">
-      ${state.events.slice(0,3).map(ev=>`
-        <div class="cal-event">
-          <div class="cal-dot"></div>
-          <div>
-            <div class="cal-event-name">${ev.name||ev.summary||'Évènement'}</div>
-            <div class="cal-event-time">${ev.date ? new Date(ev.date).toLocaleDateString('fr-FR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''}</div>
-          </div>
-        </div>
-      `).join('')}
-    </div>` : ''}
-  `;
-}
-
-function emailRowHTML(e, i) {
-  return `<div class="email-row ${e.unread?'unread':''}" onclick="openEmail(${i})">
-    ${avatarHTML(e.from, i)}
-    <div class="email-info">
-      <div class="email-from">${(e.from.split('<')[0].trim()||e.from).slice(0,22)}</div>
-      <div class="email-subject">${e.subject}</div>
-    </div>
-    <div class="email-meta">
-      <div class="email-time">${timeAgo(e.date)}</div>
-      ${tagHTML(e.cat||'perso')}
-    </div>
-  </div>`;
-}
-
-function renderEmails() {
-  const classified = state.emails;
-  if (!classified.length) return `<div class="empty-state"><i class="ti ti-mail-off"></i><p>Aucun email chargé.<br>Appuie sur actualiser pour charger tes emails Gmail.</p></div>`;
-  return `<div class="email-list">${classified.map((e,i)=>emailRowHTML(e,i)).join('')}</div>`;
-}
-
-function renderCalendar() {
-  const evs = state.events;
-  if (!evs.length) return `<div class="empty-state"><i class="ti ti-calendar-off"></i><p>Aucun évènement trouvé.<br>Connecte Google Calendar.</p></div>`;
-  return `<div class="cal-card">${evs.map(ev=>`
-    <div class="cal-event">
-      <div class="cal-dot"></div>
-      <div>
-        <div class="cal-event-name">${ev.name||ev.summary||'Évènement'}</div>
-        <div class="cal-event-time">${ev.date ? new Date(ev.date).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ev.time||''} ${ev.duration?'· '+ev.duration:''}</div>
-      </div>
-    </div>
-  `).join('')}</div>`;
-}
-
-function renderSettings() {
-  return `
-    <div class="section-title"><i class="ti ti-plug"></i> Comptes connectés</div>
-    <div class="settings-group">
-      <div class="settings-row">
-        <div class="settings-icon"><i class="ti ti-brand-gmail"></i></div>
-        <div class="settings-label">Gmail</div>
-        <button class="settings-toggle" onclick="this.classList.toggle('off')"></button>
-      </div>
-      <div class="settings-row">
-        <div class="settings-icon"><i class="ti ti-calendar"></i></div>
-        <div class="settings-label">Google Calendar</div>
-        <button class="settings-toggle" onclick="this.classList.toggle('off')"></button>
-      </div>
-      <div class="settings-row">
-        <div class="settings-icon"><i class="ti ti-brand-google-drive"></i></div>
-        <div class="settings-label">Google Drive</div>
-        <button class="settings-toggle off" onclick="this.classList.toggle('off')"></button>
-      </div>
-    </div>
-
-    <div class="section-title"><i class="ti ti-bell"></i> Notifications</div>
-    <div class="settings-group">
-      <div class="settings-row">
-        <div class="settings-icon"><i class="ti ti-clock"></i></div>
-        <div class="settings-label">Récap quotidien</div>
-        <button class="settings-toggle" onclick="this.classList.toggle('off')"></button>
-      </div>
-      <div class="settings-row">
-        <div class="settings-icon"><i class="ti ti-alert-circle"></i></div>
-        <div class="settings-label">Alertes urgents</div>
-        <button class="settings-toggle" onclick="this.classList.toggle('off')"></button>
-      </div>
-    </div>
-
-    <div class="section-title"><i class="ti ti-robot"></i> IA</div>
-    <div class="settings-group">
-      <div class="settings-row">
-        <div class="settings-icon"><i class="ti ti-tag"></i></div>
-        <div class="settings-label">Classification auto</div>
-        <button class="settings-toggle" onclick="this.classList.toggle('off')"></button>
-      </div>
-      <div class="settings-row">
-        <div class="settings-icon"><i class="ti ti-writing"></i></div>
-        <div class="settings-label">Réponses suggérées</div>
-        <button class="settings-toggle" onclick="this.classList.toggle('off')"></button>
-      </div>
-    </div>
-
-    <div class="section-title"><i class="ti ti-info-circle"></i> Infos</div>
-    <div class="settings-group">
-      <div class="settings-row">
-        <div class="settings-icon" style="background:var(--surface2)"><i class="ti ti-app-window" style="color:var(--text2)"></i></div>
-        <div class="settings-label">Version 1.0.0</div>
-        <i class="ti ti-chevron-right settings-chevron"></i>
-      </div>
-    </div>
-  `;
-}
-
-function render() {
-  const c = document.getElementById('content');
-  switch(state.currentTab) {
-    case 'dashboard': c.innerHTML = renderDashboard(); break;
-    case 'emails': c.innerHTML = renderEmails(); break;
-    case 'calendar': c.innerHTML = renderCalendar(); break;
-    case 'settings': c.innerHTML = renderSettings(); break;
-  }
-}
-
-function switchTab(tab, el) {
-  state.currentTab = tab;
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  render();
-}
-
-function openEmail(idx) {
-  const e = state.emails[idx];
-  if (!e) return;
-  document.getElementById('email-modal-title').textContent = e.subject||'Email';
-  document.getElementById('email-modal-body').innerHTML = `
-    <strong>De :</strong> ${e.from}<br>
-    <strong>Date :</strong> ${e.date ? new Date(e.date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}) : '—'}<br>
-    <strong>Catégorie :</strong> ${e.cat||'—'}<br><br>
-    ${e.snippet ? `<em>"${e.snippet}"</em>` : 'Ouvre Gmail pour lire le message complet.'}
-  `;
-  document.getElementById('email-modal-reply').onclick = () => {
-    alert('Pour répondre, ouvre cet email dans Gmail et utilise Claude pour rédiger ta réponse.');
-  };
-  document.getElementById('email-modal').classList.add('open');
-}
-
-function closeEmailModal(e) {
-  if (!e || e.target.id==='email-modal') document.getElementById('email-modal').classList.remove('open');
-}
-
-async function openRecapModal() {
-  document.getElementById('recap-modal').classList.add('open');
-  document.getElementById('recap-modal-body').innerHTML = '<div class="loading-inline"><div class="spinner-sm"></div> Génération du récap...</div>';
-  const recap = await generateRecap();
-  document.getElementById('recap-modal-body').innerHTML = recap;
-}
-
-function closeRecapModal(e) {
-  if (!e || e.target.id==='recap-modal') document.getElementById('recap-modal').classList.remove('open');
-}
-
-async function refreshAll() {
-  render();
+async function loadAllData() {
   document.getElementById('content').innerHTML = '<div class="loading-inline"><div class="spinner-sm"></div> Chargement...</div>';
   const [emails, events] = await Promise.all([loadEmails(), loadEvents()]);
   state.emails = emails.map(e=>({...e, cat: classify(e.subject, e.from)}));
   state.events = events;
   const unread = state.emails.filter(e=>e.unread).length;
   const badge = document.getElementById('tab-badge-emails');
-  if (badge) badge.textContent = unread || '0';
+  if (badge) badge.textContent = unread||'0';
   render();
 }
-
+function showApp() { document.getElementById('login-screen').style.display='none'; document.getElementById('app').style.display='flex'; render(); }
+function showLogin() { document.getElementById('app').style.display='none'; document.getElementById('login-screen').style.display='flex'; }
+function logout() { state.accessToken=null; state.userInfo=null; state.emails=[]; state.events=[]; localStorage.removeItem('gtoken'); showLogin(); }
+function renderDashboard() {
+  const c=state.emails, unread=c.filter(e=>e.unread).length, urgent=c.filter(e=>e.cat==='urgent').length, promo=c.filter(e=>e.cat==='promo').length;
+  const now=new Date(), dateStr=now.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  const name=state.userInfo?.given_name||'toi';
+  const recapText=c.length?`Tu as <strong>${unread} email${unread>1?'s':''} non lu${unread>1?'s':''}</strong>, dont <strong>${urgent} urgent${urgent>1?'s':''}</strong> et <strong>${promo} promo${promo>1?'s':''}</strong>.`:`Aucun email chargé.`;
+  return `
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-label">Non lus</div><div class="stat-value">${unread}</div><div class="stat-sub">Aujourd'hui</div></div>
+      <div class="stat-card"><div class="stat-label">Urgents</div><div class="stat-value" style="color:var(--red)">${urgent}</div><div class="stat-sub">À traiter</div></div>
+      <div class="stat-card"><div class="stat-label">Promos</div><div class="stat-value" style="color:var(--green)">${promo}</div><div class="stat-sub">Classifiés auto</div></div>
+      <div class="stat-card"><div class="stat-label">Évènements</div><div class="stat-value" style="color:var(--purple)">${state.events.length}</div><div class="stat-sub">Cette semaine</div></div>
+    </div>
+    <div class="recap-card">
+      <div class="recap-card-header"><i class="ti ti-sparkles"></i><div><div class="recap-card-title">Récap IA — Bonjour ${name} 👋</div><div class="recap-card-date">${dateStr}</div></div></div>
+      <div class="recap-card-body">${recapText}</div>
+      <button class="recap-cta" onclick="openRecapModal()"><i class="ti ti-sparkles"></i> Récap complet</button>
+    </div>
+    <div class="section-title"><i class="ti ti-mail"></i> Emails récents</div>
+    ${c.slice(0,4).length?`<div class="email-list">${c.slice(0,4).map((e,i)=>emailRowHTML(e,i)).join('')}</div>`:`<div class="empty-state"><i class="ti ti-mail-off"></i><p>Aucun email trouvé</p></div>`}
+    ${state.events.length?`<div class="section-title" style="margin-top:16px"><i class="ti ti-calendar"></i> Agenda</div><div class="cal-card">${state.events.slice(0,3).map(ev=>`<div class="cal-event"><div class="cal-dot"></div><div><div class="cal-event-name">${ev.name}</div><div class="cal-event-time">${ev.date?new Date(ev.date).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div></div>`).join('')}</div>`:''}`;
+}
+function emailRowHTML(e,i) { return `<div class="email-row" onclick="openEmail(${i})">${avatarHTML(e.from,i)}<div class="email-info"><div class="email-from">${(e.from.split('<')[0].trim()||e.from).slice(0,22)}</div><div class="email-subject">${e.subject}</div></div><div class="email-meta"><div class="email-time">${timeAgo(e.date)}</div>${tagHTML(e.cat||'perso')}</div></div>`; }
+function renderEmails() { if (!state.emails.length) return `<div class="empty-state"><i class="ti ti-mail-off"></i><p>Aucun email chargé.</p></div>`; return `<div class="email-list">${state.emails.map((e,i)=>emailRowHTML(e,i)).join('')}</div>`; }
+function renderCalendar() { if (!state.events.length) return `<div class="empty-state"><i class="ti ti-calendar-off"></i><p>Aucun évènement cette semaine.</p></div>`; return `<div class="cal-card">${state.events.map(ev=>`<div class="cal-event"><div class="cal-dot"></div><div><div class="cal-event-name">${ev.name}</div><div class="cal-event-time">${ev.date?new Date(ev.date).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div></div>`).join('')}</div>`; }
+function renderSettings() {
+  const user=state.userInfo;
+  return `${user?`<div class="settings-group"><div class="settings-row"><div class="settings-icon"><i class="ti ti-user"></i></div><div style="flex:1"><div style="font-size:14px;font-weight:600;color:var(--text)">${user.name||''}</div><div style="font-size:12px;color:var(--text2)">${user.email||''}</div></div></div></div>`:''}
+    <div class="section-title"><i class="ti ti-plug"></i> Comptes connectés</div>
+    <div class="settings-group">
+      <div class="settings-row"><div class="settings-icon"><i class="ti ti-brand-gmail"></i></div><div class="settings-label">Gmail</div><button class="settings-toggle"></button></div>
+      <div class="settings-row"><div class="settings-icon"><i class="ti ti-calendar"></i></div><div class="settings-label">Google Calendar</div><button class="settings-toggle"></button></div>
+    </div>
+    <div class="section-title"><i class="ti ti-bell"></i> Notifications</div>
+    <div class="settings-group">
+      <div class="settings-row"><div class="settings-icon"><i class="ti ti-clock"></i></div><div class="settings-label">Récap quotidien</div><button class="settings-toggle" onclick="this.classList.toggle('off')"></button></div>
+      <div class="settings-row"><div class="settings-icon"><i class="ti ti-alert-circle"></i></div><div class="settings-label">Alertes urgents</div><button class="settings-toggle" onclick="this.classList.toggle('off')"></button></div>
+    </div>
+    <div class="section-title"><i class="ti ti-info-circle"></i> Infos</div>
+    <div class="settings-group"><div class="settings-row"><div class="settings-icon" style="background:var(--surface2)"><i class="ti ti-app-window" style="color:var(--text2)"></i></div><div class="settings-label">Version 1.0.0</div></div></div>
+    <button class="logout-btn" onclick="logout()"><i class="ti ti-logout" style="margin-right:6px"></i> Se déconnecter</button>`;
+}
+function render() { const c=document.getElementById('content'); if(!c)return; switch(state.currentTab){case 'dashboard':c.innerHTML=renderDashboard();break;case 'emails':c.innerHTML=renderEmails();break;case 'calendar':c.innerHTML=renderCalendar();break;case 'settings':c.innerHTML=renderSettings();break;} }
+function switchTab(tab,el) { state.currentTab=tab; document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); el.classList.add('active'); render(); }
+function openEmail(idx) {
+  const e=state.emails[idx]; if(!e)return;
+  document.getElementById('email-modal-title').textContent=e.subject||'Email';
+  document.getElementById('email-modal-body').innerHTML=`<strong>De :</strong> ${e.from}<br><strong>Date :</strong> ${e.date?new Date(e.date).toLocaleDateString('fr-FR',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'—'}<br><strong>Catégorie :</strong> ${e.cat||'—'}<br><br>${e.snippet?`<em>"${e.snippet}"</em>`:''}`;
+  document.getElementById('email-modal-reply').onclick=()=>{ window.open(`https://mail.google.com/mail/u/0/#inbox/${e.id}`,'_blank'); };
+  document.getElementById('email-modal').classList.add('open');
+}
+function closeEmailModal(e) { if(!e||e.target.id==='email-modal') document.getElementById('email-modal').classList.remove('open'); }
+async function openRecapModal() {
+  document.getElementById('recap-modal').classList.add('open');
+  const emails=state.emails; if(!emails.length){document.getElementById('recap-modal-body').innerHTML='Aucun email chargé.';return;}
+  const unread=emails.filter(e=>e.unread).length, urgent=emails.filter(e=>e.cat==='urgent'), pro=emails.filter(e=>e.cat==='pro'), promo=emails.filter(e=>e.cat==='promo'), perso=emails.filter(e=>e.cat==='perso');
+  let recap=`Tu as <strong>${unread} email${unread>1?'s':''} non lu${unread>1?'s':''}</strong> aujourd'hui.<br><br>`;
+  if(urgent.length) recap+=`<strong>🔴 Urgents (${urgent.length}) :</strong> ${urgent.map(e=>`"${e.subject}" de ${e.from.split('<')[0].trim()}`).join(', ')}<br><br>`;
+  if(pro.length) recap+=`<strong>💼 Pro (${pro.length}) :</strong> ${pro.map(e=>e.from.split('<')[0].trim()).join(', ')}<br><br>`;
+  if(promo.length) recap+=`<strong>🏷️ Promos (${promo.length}) :</strong> ${promo.length} email${promo.length>1?'s':''} à ignorer.<br><br>`;
+  if(perso.length) recap+=`<strong>👤 Perso (${perso.length}) :</strong> ${perso.map(e=>e.from.split('<')[0].trim()).join(', ')}`;
+  document.getElementById('recap-modal-body').innerHTML=recap;
+}
+function closeRecapModal(e) { if(!e||e.target.id==='recap-modal') document.getElementById('recap-modal').classList.remove('open'); }
+async function refreshAll() { await loadAllData(); }
 async function init() {
-  await new Promise(r=>setTimeout(r, 1200));
-  document.getElementById('splash').style.opacity = '0';
-  setTimeout(()=>{
-    document.getElementById('splash').style.display = 'none';
-    document.getElementById('app').style.display = 'flex';
-  }, 400);
-  render();
-  const [emails, events] = await Promise.all([loadEmails(), loadEvents()]);
-  state.emails = emails.map(e=>({...e, cat: classify(e.subject, e.from)}));
-  state.events = events;
-  state.loaded = true;
-  const unread = state.emails.filter(e=>e.unread).length;
-  const badge = document.getElementById('tab-badge-emails');
-  if (badge) badge.textContent = unread || '0';
-  render();
+  await new Promise(r=>setTimeout(r,1000));
+  document.getElementById('splash').style.opacity='0';
+  setTimeout(async()=>{
+    document.getElementById('splash').style.display='none';
+    const savedToken=localStorage.getItem('gtoken');
+    if(savedToken){state.accessToken=savedToken;showApp();await fetchUserInfo();await loadAllData();}
+    else showLogin();
+  },400);
 }
-
 init();
 </script>
 </body>
