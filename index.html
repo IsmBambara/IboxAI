@@ -375,7 +375,7 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Displ
 
 <script>
 const CLIENT_ID='322785652939-6rhef2cf231rt3i13l7icrp20oojce9q.apps.googleusercontent.com';
-const SCOPES='https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.compose https://www.googleapis.com/auth/calendar.readonly profile email';
+const SCOPES='https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send https://www.googleapis.com/auth/gmail.compose https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/generative-language.retriever profile email';
 
 // ── TRANSLATIONS ──
 const T = {
@@ -600,18 +600,44 @@ function renderDashboard(){
 }
 
 function emailRowHTML(e,i){
-  return`<div class="email-row ${e.unread?'unread':''}" onclick="openEmail(${i})" oncontextmenu="hideEmail(event,${i})" ontouchstart="startLongPress(event,()=>hideEmail(event,${i}))" ontouchend="cancelLongPress()">${avatarHTML(e.from,i)}<div class="email-info"><div class="email-from">${(e.from.split('<')[0].trim()||e.from).slice(0,24)}</div><div class="email-subject">${e.subject}</div></div><div class="email-meta"><div class="email-time">${timeAgo(e.date)}</div>${tagHTML(e.cat||'perso')}</div></div>`;
+  const hidden=isHidden(e.id);
+  return`<div class="email-row ${e.unread?'unread':''}" style="display:flex;align-items:center;gap:10px">
+    <div onclick="toggleHide('${e.id}')" style="width:24px;height:24px;border-radius:6px;border:1.5px solid ${hidden?'var(--purple)':'var(--border)'};background:${hidden?'var(--purple)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all 0.15s">
+      ${hidden?'<i class="ti ti-lock" style="font-size:13px;color:white"></i>':'<i class="ti ti-lock-open" style="font-size:13px;color:var(--text3)"></i>'}
+    </div>
+    <div onclick="openEmail(${i})" style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+      ${avatarHTML(e.from,i)}
+      <div class="email-info">
+        <div class="email-from">${(e.from.split('<')[0].trim()||e.from).slice(0,24)}</div>
+        <div class="email-subject">${e.subject}</div>
+      </div>
+      <div class="email-meta"><div class="email-time">${timeAgo(e.date)}</div>${tagHTML(e.cat||'perso')}</div>
+    </div>
+  </div>`;
 }
 function renderEmails(){
   if(!state.emails.length)return`<div class="empty-state"><i class="ti ti-mail-off"></i><p>${t('aucunEmail')}<br>${t('aucunEmailSub')}</p></div>`;
   const visible=state.emails.filter(e=>!isHidden(e.id));
   if(!visible.length)return`<div class="empty-state"><i class="ti ti-mail-off"></i><p>${t('aucunEmail')}<br>${t('aucunEmailSub')}</p></div>`;
-  return`<div class="email-list">${visible.map((e,i)=>emailRowHTML(e,i)).join('')}</div><p class="long-press-hint"><i class="ti ti-hand-finger" style="font-size:13px"></i> ${state.lang==='fr'?'Appui long pour masquer':'Long press to hide'}</p>`;
+  return`<div class="email-list">${state.emails.map((e,i)=>emailRowHTML(e,i)).join('')}</div><p class="long-press-hint" style="margin-top:8px"><i class="ti ti-lock" style="font-size:13px"></i> ${state.lang==='fr'?'Clique le cadenas pour rendre privé':'Click the lock to make private'}</p>`;
 }
 function renderCalendar(){
-  const visEvents=state.events.filter(ev=>!isHidden(ev.name+ev.date));
-  if(!visEvents.length)return`<div class="empty-state"><i class="ti ti-calendar-off"></i><p>${t('aucunEvenement')}</p></div>`;
-  return`<div class="cal-card">${visEvents.map(ev=>{const eid=ev.name+ev.date;return`<div class="cal-event" oncontextmenu="event.preventDefault();hideEvent('${eid}')" ontouchstart="startLongPress(event,()=>hideEvent('${eid}'))" ontouchend="cancelLongPress()"><div class="cal-dot"></div><div><div class="cal-event-name">${ev.name}</div><div class="cal-event-time">${ev.date?new Date(ev.date).toLocaleDateString(state.lang==='fr'?'fr-FR':'en-GB',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div></div>`;}).join('')}</div>`;
+  if(!state.events.length)return`<div class="empty-state"><i class="ti ti-calendar-off"></i><p>${t('aucunEvenement')}</p></div>`;
+  return`<div class="cal-card">${state.events.map(ev=>{
+    const eid=ev.name+ev.date;
+    const hidden=isHidden(eid);
+    return`<div class="cal-event" style="display:flex;align-items:center;gap:10px">
+      <div onclick="toggleHide('${eid}')" style="width:24px;height:24px;border-radius:6px;border:1.5px solid ${hidden?'var(--purple)':'var(--border)'};background:${hidden?'var(--purple)':'transparent'};display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all 0.15s">
+        ${hidden?'<i class="ti ti-lock" style="font-size:13px;color:white"></i>':'<i class="ti ti-lock-open" style="font-size:13px;color:var(--text3)"></i>'}
+      </div>
+      <div style="flex:1;min-width:0">
+        <div class="cal-event-name" style="${hidden?'text-decoration:line-through;opacity:0.5':''}">${ev.name}</div>
+        <div class="cal-event-time">${ev.date?new Date(ev.date).toLocaleDateString(state.lang==='fr'?'fr-FR':'en-GB',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div>
+      </div>
+      ${hidden?`<span style="font-size:10px;padding:2px 7px;border-radius:20px;background:var(--purple-light);color:var(--purple);font-weight:600">${state.lang==='fr'?'Privé':'Private'}</span>`:''}
+    </div>`;
+  }).join('')}</div>
+  <p class="long-press-hint" style="margin-top:8px"><i class="ti ti-lock" style="font-size:13px"></i> ${state.lang==='fr'?'Clique le cadenas pour rendre privé':'Click the lock to make private'}</p>`;
 }
 
 function renderSettings(){
@@ -688,13 +714,45 @@ function openEmail(idx){
   document.getElementById('email-modal-title').textContent=e.subject||'Email';
   document.getElementById('email-modal-body').innerHTML=`
     <div style="font-size:13px;color:var(--text2);margin-bottom:12px">
-      <div style="margin-bottom:4px"><strong style="color:var(--text)">De :</strong> ${e.from}</div>
-      <div style="margin-bottom:4px"><strong style="color:var(--text)">Date :</strong> ${e.date?new Date(e.date).toLocaleDateString(state.lang==='fr'?'fr-FR':'en-GB',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'-'}</div>
-      <div><strong style="color:var(--text)">Catégorie :</strong> ${e.cat||'-'}</div>
+      <div style="margin-bottom:4px"><strong style="color:var(--text)">${state.lang==='fr'?'De':'From'} :</strong> ${e.from}</div>
+      <div style="margin-bottom:4px"><strong style="color:var(--text)">${state.lang==='fr'?'Date':'Date'} :</strong> ${e.date?new Date(e.date).toLocaleDateString(state.lang==='fr'?'fr-FR':'en-GB',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'}):'-'}</div>
+      <div><strong style="color:var(--text)">${state.lang==='fr'?'Catégorie':'Category'} :</strong> ${e.cat||'-'}</div>
     </div>
-    ${e.snippet?`<div style="background:var(--surface2);padding:12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text);line-height:1.6;font-style:italic">"${e.snippet}"</div>`:''}
+    <div id="email-summary" style="margin-bottom:12px"></div>
+    ${e.snippet?`<div style="background:var(--surface2);padding:12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text);line-height:1.6;font-style:italic;margin-bottom:12px">"${e.snippet}"</div>`:''}
+    <button onclick="document.getElementById('full-email-section').style.display='block';this.style.display='none';loadFullEmail('${e.id}')" style="width:100%;padding:10px;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface2);color:var(--text2);font-size:13px;cursor:pointer;margin-bottom:8px">
+      <i class="ti ti-mail-opened" style="margin-right:6px"></i>${state.lang==='fr'?'Voir le mail complet':'View full email'}
+    </button>
+    <div id="full-email-section" style="display:none;background:var(--surface2);padding:12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:200px;overflow-y:auto"></div>
   `;
   document.getElementById('email-modal').classList.add('open');
+  summarizeEmail(e.id);
+}
+
+async function loadFullEmail(id){
+  const el=document.getElementById('full-email-section');
+  if(!el)return;
+  el.innerHTML=`<div class="loading-inline" style="padding:8px"><div class="spinner-sm"></div></div>`;
+  try{
+    const res=await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${id}?format=full`,{headers:{Authorization:`Bearer ${state.accessToken}`}});
+    const msg=await res.json();
+    // Extract plain text body
+    function extractBody(payload){
+      if(!payload)return'';
+      if(payload.mimeType==='text/plain'&&payload.body?.data){
+        return atob(payload.body.data.replace(/-/g,'+').replace(/_/g,'/'));
+      }
+      if(payload.parts){
+        for(const p of payload.parts){const t=extractBody(p);if(t)return t;}
+      }
+      if(payload.body?.data){
+        try{return atob(payload.body.data.replace(/-/g,'+').replace(/_/g,'/'));}catch{return'';}
+      }
+      return'';
+    }
+    const body=extractBody(msg.payload)||msg.snippet||'';
+    el.textContent=body||'(contenu vide)';
+  }catch{el.textContent=state.lang==='fr'?'Impossible de charger le mail':'Could not load email';}
 }
 
 // ── REPLY MODAL ──
@@ -711,28 +769,44 @@ function openReplyModal(){
   document.getElementById('reply-modal').classList.add('open');
 }
 
+async function callGemini(prompt){
+  const key='AIzaSyD-placeholder';
+  // Use Gemini via Google's generative language API with the user's OAuth token
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${state.accessToken}`},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:400,temperature:0.7}})
+    });
+    const data=await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text||null;
+  }catch{return null;}
+}
+
 async function generateAIReply(){
   const e=state.currentEmail;
   if(!e)return;
   const btn=document.getElementById('reply-ai-btn');
   btn.innerHTML=`<div class="spinner-sm" style="margin:0 auto"></div>`;
   btn.disabled=true;
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:300,
-        messages:[{role:'user',content:`Tu es un assistant email. Rédige une réponse courte, professionnelle et polie en ${state.lang==='fr'?'français':'anglais'} à cet email.\n\nDe: ${e.from}\nSujet: ${e.subject}\nMessage: ${e.snippet}\n\nRéponds directement sans salutation ni signature, juste le corps du message.`}]
-      })
-    });
-    const data=await res.json();
-    const text=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    if(text)document.getElementById('reply-text').value=text;
-  }catch{}
+  const prompt=`Tu es un assistant email. Rédige une réponse courte, professionnelle et polie en ${state.lang==='fr'?'français':'anglais'} à cet email.\n\nDe: ${e.from}\nSujet: ${e.subject}\nMessage: ${e.snippet}\n\nRéponds directement sans salutation ni signature, juste le corps du message.`;
+  const text=await callGemini(prompt);
+  if(text)document.getElementById('reply-text').value=text;
   btn.innerHTML=`<i class="ti ti-sparkles" style="margin-right:6px"></i><span class="t-ai-suggest">${t('aiSuggest')}</span>`;
   btn.disabled=false;
+}
+
+async function summarizeEmail(emailId){
+  const e=state.emails.find(em=>em.id===emailId);
+  if(!e)return;
+  const summaryEl=document.getElementById('email-summary');
+  if(!summaryEl)return;
+  summaryEl.innerHTML=`<div class="loading-inline" style="padding:8px"><div class="spinner-sm"></div> ${state.lang==='fr'?'Résumé en cours...':'Summarizing...'}</div>`;
+  const prompt=`Résume cet email en 2-3 phrases maximum en ${state.lang==='fr'?'français':'anglais'}.\n\nDe: ${e.from}\nSujet: ${e.subject}\nMessage: ${e.snippet}`;
+  const text=await callGemini(prompt);
+  summaryEl.innerHTML=text
+    ?`<div style="background:var(--purple-light);padding:12px;border-radius:var(--radius-sm);font-size:13px;color:var(--text);line-height:1.6;border-left:3px solid var(--purple)"><strong style="color:var(--purple);font-size:11px;text-transform:uppercase;letter-spacing:0.5px">✨ ${state.lang==='fr'?'Résumé IA':'AI Summary'}</strong><br><br>${text}</div>`
+    :`<div style="color:var(--text3);font-size:12px;text-align:center;padding:8px">${state.lang==='fr'?'Résumé indisponible':'Summary unavailable'}</div>`;
 }
 
 async function sendReply(){
