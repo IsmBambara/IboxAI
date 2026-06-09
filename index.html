@@ -186,6 +186,27 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Displ
 .btn-purple{background:var(--purple);color:white;}
 .btn-ghost{background:var(--surface2);color:var(--text);}
 .btn-green{background:#1D9E75;color:white;}
+.btn-red{background:var(--red);color:white;}
+.long-press-hint{font-size:11px;color:var(--text3);text-align:center;padding:6px 0 2px;letter-spacing:0.2px;}
+.hidden-badge{background:#8B5CF6;color:white;font-size:10px;padding:1px 6px;border-radius:20px;margin-left:4px;}
+.pin-input{width:100%;padding:16px;font-size:28px;letter-spacing:12px;text-align:center;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface2);color:var(--text);outline:none;font-family:monospace;}
+.pin-input:focus{border-color:var(--purple);}
+.pin-dots{display:flex;justify-content:center;gap:12px;margin:16px 0;}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--border);transition:all 0.15s;}
+.pin-dot.filled{background:var(--purple);border-color:var(--purple);}
+.pin-keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:8px;}
+.pin-key{padding:16px;font-size:20px;font-weight:500;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;text-align:center;}
+.pin-key:active{background:var(--surface2);}
+.pin-key.del{color:var(--red);}
+.pin-error{color:var(--red);font-size:13px;text-align:center;margin-top:8px;}
+.private-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:0.5px solid var(--border);background:var(--surface);}
+.private-item:last-child{border-bottom:none;}
+.private-item-info{flex:1;min-width:0;}
+.private-item-title{font-size:14px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.private-item-sub{font-size:12px;color:var(--text2);}
+.unhide-btn{font-size:12px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;}
+.private-section{margin-bottom:16px;}
+.reset-link{text-align:center;font-size:13px;color:var(--purple);cursor:pointer;margin-top:12px;display:block;}
 </style>
 </head>
 <body>
@@ -228,8 +249,85 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Displ
     <button class="tab" onclick="switchTab('emails',this)"><i class="ti ti-mail"></i> <span class="t-emails">Emails</span> <span class="tab-badge" id="tab-badge-emails">0</span></button>
     <button class="tab" onclick="switchTab('calendar',this)"><i class="ti ti-calendar"></i> <span class="t-agenda">Agenda</span></button>
     <button class="tab" onclick="switchTab('settings',this)"><i class="ti ti-settings"></i> <span class="t-settings">Réglages</span></button>
+    <button class="tab" onclick="openPrivateTab(this)"><i class="ti ti-lock"></i> <span class="t-private">Privé</span></button>
   </div>
   <div class="content" id="content"></div>
+</div>
+
+<!-- PIN MODAL -->
+<div class="modal-overlay" id="pin-modal" onclick="closePinModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="pin-modal-title" style="text-align:center"><i class="ti ti-lock" style="color:var(--purple);margin-right:8px"></i><span id="pin-title-text">Onglet Privé</span></div>
+    <div id="pin-modal-body">
+      <div class="pin-dots" id="pin-dots">
+        <div class="pin-dot" id="dot-0"></div>
+        <div class="pin-dot" id="dot-1"></div>
+        <div class="pin-dot" id="dot-2"></div>
+        <div class="pin-dot" id="dot-3"></div>
+      </div>
+      <div class="pin-error" id="pin-error"></div>
+      <div class="pin-keypad">
+        <button class="pin-key" onclick="pinPress('1')">1</button>
+        <button class="pin-key" onclick="pinPress('2')">2</button>
+        <button class="pin-key" onclick="pinPress('3')">3</button>
+        <button class="pin-key" onclick="pinPress('4')">4</button>
+        <button class="pin-key" onclick="pinPress('5')">5</button>
+        <button class="pin-key" onclick="pinPress('6')">6</button>
+        <button class="pin-key" onclick="pinPress('7')">7</button>
+        <button class="pin-key" onclick="pinPress('8')">8</button>
+        <button class="pin-key" onclick="pinPress('9')">9</button>
+        <button class="pin-key" onclick="pinPress('0')" style="grid-column:2">0</button>
+        <button class="pin-key del" onclick="pinDel()"><i class="ti ti-backspace"></i></button>
+      </div>
+      <span class="reset-link" onclick="startPinReset()" id="reset-link">Mot de passe oublié ?</span>
+    </div>
+  </div>
+</div>
+
+<!-- RESET PIN MODAL -->
+<div class="modal-overlay" id="reset-pin-modal" onclick="closeModal('reset-pin-modal',event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title"><i class="ti ti-mail" style="color:var(--purple);margin-right:8px"></i>Réinitialiser le code</div>
+    <div class="modal-body">
+      <div id="reset-step-1">
+        <p style="margin-bottom:16px;font-size:13px">Un code de vérification va être envoyé à ton adresse Gmail.</p>
+        <p style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:20px" id="reset-email-display"></p>
+        <button class="btn-full btn-purple" onclick="sendResetCode()"><i class="ti ti-send" style="margin-right:6px"></i>Envoyer le code</button>
+        <button class="btn-full btn-ghost" onclick="closeModal('reset-pin-modal')">Annuler</button>
+      </div>
+      <div id="reset-step-2" style="display:none">
+        <p style="margin-bottom:12px;font-size:13px">Entre le code à 6 chiffres reçu par email :</p>
+        <input type="number" id="reset-code-input" style="width:100%;padding:14px;font-size:22px;letter-spacing:8px;text-align:center;border-radius:var(--radius-sm);border:0.5px solid var(--border);background:var(--surface2);color:var(--text);outline:none" placeholder="000000" maxlength="6">
+        <div class="pin-error" id="reset-code-error"></div>
+        <button class="btn-full btn-purple" onclick="verifyResetCode()" style="margin-top:12px">Vérifier</button>
+        <button class="btn-full btn-ghost" onclick="closeModal('reset-pin-modal')">Annuler</button>
+      </div>
+      <div id="reset-step-3" style="display:none">
+        <p style="margin-bottom:12px;font-size:13px">Choisis ton nouveau code PIN (4 chiffres) :</p>
+        <div class="pin-dots" id="new-pin-dots">
+          <div class="pin-dot" id="new-dot-0"></div>
+          <div class="pin-dot" id="new-dot-1"></div>
+          <div class="pin-dot" id="new-dot-2"></div>
+          <div class="pin-dot" id="new-dot-3"></div>
+        </div>
+        <div class="pin-keypad">
+          <button class="pin-key" onclick="newPinPress('1')">1</button>
+          <button class="pin-key" onclick="newPinPress('2')">2</button>
+          <button class="pin-key" onclick="newPinPress('3')">3</button>
+          <button class="pin-key" onclick="newPinPress('4')">4</button>
+          <button class="pin-key" onclick="newPinPress('5')">5</button>
+          <button class="pin-key" onclick="newPinPress('6')">6</button>
+          <button class="pin-key" onclick="newPinPress('7')">7</button>
+          <button class="pin-key" onclick="newPinPress('8')">8</button>
+          <button class="pin-key" onclick="newPinPress('9')">9</button>
+          <button class="pin-key" onclick="newPinPress('0')" style="grid-column:2">0</button>
+          <button class="pin-key del" onclick="newPinDel()"><i class="ti ti-backspace"></i></button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- RECAP MODAL -->
@@ -497,20 +595,23 @@ function renderDashboard(){
       <button class="recap-cta" onclick="openRecapModal()"><i class="ti ti-sparkles"></i> ${t('recapBtn')}</button>
     </div>
     <div class="section-title"><i class="ti ti-mail"></i> ${t('emailsRecents')}</div>
-    ${c.slice(0,4).length?`<div class="email-list">${c.slice(0,4).map((e,i)=>emailRowHTML(e,i)).join('')}</div>`:`<div class="empty-state"><i class="ti ti-mail-off"></i><p>${t('aucunEmail')}<br>${t('aucunEmailSub')}</p></div>`}
+    ${(()=>{const vis=c.filter(e=>!isHidden(e.id)).slice(0,4);return vis.length?`<div class="email-list">${vis.map((e,i)=>emailRowHTML(e,i)).join('')}</div>`:`<div class="empty-state"><i class="ti ti-mail-off"></i><p>${t('aucunEmail')}<br>${t('aucunEmailSub')}</p></div>`;})()}
     ${state.events.length?`<div class="section-title" style="margin-top:16px"><i class="ti ti-calendar"></i> ${t('agenda')}</div><div class="cal-card">${state.events.slice(0,3).map(ev=>`<div class="cal-event"><div class="cal-dot"></div><div><div class="cal-event-name">${ev.name}</div><div class="cal-event-time">${ev.date?new Date(ev.date).toLocaleDateString(state.lang==='fr'?'fr-FR':'en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div></div>`).join('')}</div>`:''}`;
 }
 
 function emailRowHTML(e,i){
-  return`<div class="email-row ${e.unread?'unread':''}" onclick="openEmail(${i})">${avatarHTML(e.from,i)}<div class="email-info"><div class="email-from">${(e.from.split('<')[0].trim()||e.from).slice(0,24)}</div><div class="email-subject">${e.subject}</div></div><div class="email-meta"><div class="email-time">${timeAgo(e.date)}</div>${tagHTML(e.cat||'perso')}</div></div>`;
+  return`<div class="email-row ${e.unread?'unread':''}" onclick="openEmail(${i})" oncontextmenu="hideEmail(event,${i})" ontouchstart="startLongPress(event,()=>hideEmail(event,${i}))" ontouchend="cancelLongPress()">${avatarHTML(e.from,i)}<div class="email-info"><div class="email-from">${(e.from.split('<')[0].trim()||e.from).slice(0,24)}</div><div class="email-subject">${e.subject}</div></div><div class="email-meta"><div class="email-time">${timeAgo(e.date)}</div>${tagHTML(e.cat||'perso')}</div></div>`;
 }
 function renderEmails(){
   if(!state.emails.length)return`<div class="empty-state"><i class="ti ti-mail-off"></i><p>${t('aucunEmail')}<br>${t('aucunEmailSub')}</p></div>`;
-  return`<div class="email-list">${state.emails.map((e,i)=>emailRowHTML(e,i)).join('')}</div>`;
+  const visible=state.emails.filter(e=>!isHidden(e.id));
+  if(!visible.length)return`<div class="empty-state"><i class="ti ti-mail-off"></i><p>${t('aucunEmail')}<br>${t('aucunEmailSub')}</p></div>`;
+  return`<div class="email-list">${visible.map((e,i)=>emailRowHTML(e,i)).join('')}</div><p class="long-press-hint"><i class="ti ti-hand-finger" style="font-size:13px"></i> ${state.lang==='fr'?'Appui long pour masquer':'Long press to hide'}</p>`;
 }
 function renderCalendar(){
-  if(!state.events.length)return`<div class="empty-state"><i class="ti ti-calendar-off"></i><p>${t('aucunEvenement')}</p></div>`;
-  return`<div class="cal-card">${state.events.map(ev=>`<div class="cal-event"><div class="cal-dot"></div><div><div class="cal-event-name">${ev.name}</div><div class="cal-event-time">${ev.date?new Date(ev.date).toLocaleDateString(state.lang==='fr'?'fr-FR':'en-GB',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div></div>`).join('')}</div>`;
+  const visEvents=state.events.filter(ev=>!isHidden(ev.name+ev.date));
+  if(!visEvents.length)return`<div class="empty-state"><i class="ti ti-calendar-off"></i><p>${t('aucunEvenement')}</p></div>`;
+  return`<div class="cal-card">${visEvents.map(ev=>{const eid=ev.name+ev.date;return`<div class="cal-event" oncontextmenu="event.preventDefault();hideEvent('${eid}')" ontouchstart="startLongPress(event,()=>hideEvent('${eid}'))" ontouchend="cancelLongPress()"><div class="cal-dot"></div><div><div class="cal-event-name">${ev.name}</div><div class="cal-event-time">${ev.date?new Date(ev.date).toLocaleDateString(state.lang==='fr'?'fr-FR':'en-GB',{weekday:'long',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div></div>`;}).join('')}</div>`;
 }
 
 function renderSettings(){
@@ -574,6 +675,7 @@ function render(){
     case'emails':c.innerHTML=renderEmails();break;
     case'calendar':c.innerHTML=renderCalendar();break;
     case'settings':c.innerHTML=renderSettings();break;
+    case'private':c.innerHTML=renderPrivate();break;
   }
 }
 function switchTab(tab,el){state.currentTab=tab;document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');render();}
@@ -687,6 +789,203 @@ function closeModal(id,e){if(!e||e.target.id===id)document.getElementById(id).cl
 async function refreshAll(){await loadAllData();}
 
 // ── INIT ──
+// ── PRIVATE / HIDDEN ──
+let pinBuffer='';
+let newPinBuffer='';
+let resetCode='';
+let privateUnlocked=false;
+
+function getHiddenIds(){try{return JSON.parse(localStorage.getItem('hiddenIds')||'[]');}catch{return[];}}
+function saveHiddenIds(ids){localStorage.setItem('hiddenIds',JSON.stringify(ids));}
+function isHidden(id){return getHiddenIds().includes(id);}
+function toggleHide(id){const ids=getHiddenIds();const idx=ids.indexOf(id);if(idx>-1)ids.splice(idx,1);else ids.push(id);saveHiddenIds(ids);render();}
+
+function getPin(){return localStorage.getItem('privatePin')||'1234';}
+function setPin(p){localStorage.setItem('privatePin',p);}
+
+function openPrivateTab(el){
+  if(privateUnlocked){switchTab('private',el);return;}
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  pinBuffer='';
+  updatePinDots('pin-dots','dot-',pinBuffer);
+  document.getElementById('pin-error').textContent='';
+  document.getElementById('pin-title-text').textContent=state.lang==='fr'?'Onglet Privé':'Private tab';
+  document.getElementById('reset-link').style.display='block';
+  // show set-pin or enter-pin
+  const hasPin=localStorage.getItem('privatePin');
+  if(!hasPin){
+    document.getElementById('pin-title-text').textContent=state.lang==='fr'?'Créer un code PIN':'Create PIN';
+    document.getElementById('reset-link').style.display='none';
+  }
+  document.getElementById('pin-modal').classList.add('open');
+  state._pendingPrivateTab=el;
+}
+
+function closePinModal(e){
+  if(!e||e.target.id==='pin-modal'){
+    document.getElementById('pin-modal').classList.remove('open');
+    // restore last active tab
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelector('.tab').classList.add('active');
+    state.currentTab='dashboard';
+    render();
+  }
+}
+
+function updatePinDots(containerId,dotPrefix,buf){
+  for(let i=0;i<4;i++){
+    const d=document.getElementById(dotPrefix+i);
+    if(d)d.className='pin-dot'+(i<buf.length?' filled':'');
+  }
+}
+
+function pinPress(d){
+  if(pinBuffer.length>=4)return;
+  pinBuffer+=d;
+  updatePinDots('pin-dots','dot-',pinBuffer);
+  if(pinBuffer.length===4){
+    const hasPin=localStorage.getItem('privatePin');
+    if(!hasPin){
+      setPin(pinBuffer);
+      document.getElementById('pin-modal').classList.remove('open');
+      privateUnlocked=true;
+      switchTab('private',state._pendingPrivateTab);
+    } else if(pinBuffer===getPin()){
+      document.getElementById('pin-modal').classList.remove('open');
+      privateUnlocked=true;
+      switchTab('private',state._pendingPrivateTab);
+    } else {
+      document.getElementById('pin-error').textContent=state.lang==='fr'?'Code incorrect':'Wrong PIN';
+      pinBuffer='';
+      updatePinDots('pin-dots','dot-',pinBuffer);
+      setTimeout(()=>{document.getElementById('pin-error').textContent='';},1200);
+    }
+  }
+}
+function pinDel(){pinBuffer=pinBuffer.slice(0,-1);updatePinDots('pin-dots','dot-',pinBuffer);}
+
+// ── PIN RESET ──
+function startPinReset(){
+  document.getElementById('pin-modal').classList.remove('open');
+  document.getElementById('reset-step-1').style.display='block';
+  document.getElementById('reset-step-2').style.display='none';
+  document.getElementById('reset-step-3').style.display='none';
+  const email=state.userInfo?.email||'ton email Gmail';
+  document.getElementById('reset-email-display').textContent=email;
+  document.getElementById('reset-pin-modal').classList.add('open');
+}
+
+async function sendResetCode(){
+  resetCode=Math.floor(100000+Math.random()*900000).toString();
+  const btn=document.querySelector('#reset-step-1 .btn-purple');
+  btn.textContent='Envoi...';btn.disabled=true;
+  const body=`Ton code de réinitialisation InboxAI by Clovis : ${resetCode}
+
+Ce code expire dans 10 minutes.`;
+  const to=state.userInfo?.email||'';
+  const ok=await sendEmailReply(to,'Code InboxAI by Clovis',body);
+  if(ok){
+    document.getElementById('reset-step-1').style.display='none';
+    document.getElementById('reset-step-2').style.display='block';
+  } else {
+    btn.textContent='Erreur — réessaie';btn.disabled=false;
+  }
+}
+
+function verifyResetCode(){
+  const input=document.getElementById('reset-code-input').value.trim();
+  if(input===resetCode){
+    document.getElementById('reset-step-2').style.display='none';
+    document.getElementById('reset-step-3').style.display='block';
+    newPinBuffer='';
+    updatePinDots('new-pin-dots','new-dot-',newPinBuffer);
+  } else {
+    document.getElementById('reset-code-error').textContent=state.lang==='fr'?'Code incorrect':'Wrong code';
+  }
+}
+
+function newPinPress(d){
+  if(newPinBuffer.length>=4)return;
+  newPinBuffer+=d;
+  updatePinDots('new-pin-dots','new-dot-',newPinBuffer);
+  if(newPinBuffer.length===4){
+    setPin(newPinBuffer);
+    closeModal('reset-pin-modal');
+    newPinBuffer='';
+    privateUnlocked=true;
+    setTimeout(()=>{switchTab('private',state._pendingPrivateTab);},300);
+  }
+}
+function newPinDel(){newPinBuffer=newPinBuffer.slice(0,-1);updatePinDots('new-pin-dots','new-dot-',newPinBuffer);}
+
+// ── LONG PRESS ──
+let longPressTimer=null;
+function startLongPress(e,cb){longPressTimer=setTimeout(()=>{e.preventDefault();cb();},600);}
+function cancelLongPress(){clearTimeout(longPressTimer);}
+
+function hideEmail(e,idx){
+  e.preventDefault();
+  const email=state.emails[idx];
+  if(!email)return;
+  toggleHide(email.id);
+  showToast(state.lang==='fr'?'Email masqué — visible dans Privé':'Email hidden — see Private tab');
+}
+
+function hideEvent(eid){
+  toggleHide(eid);
+  showToast(state.lang==='fr'?'Évènement masqué':'Event hidden');
+}
+
+function showToast(msg){
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style.cssText='position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1A1829;color:white;padding:10px 18px;border-radius:20px;font-size:13px;z-index:200;opacity:0;transition:opacity 0.2s;white-space:nowrap';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  clearTimeout(t._timer);t._timer=setTimeout(()=>{t.style.opacity='0';},2500);
+}
+
+// ── RENDER PRIVATE ──
+function renderPrivate(){
+  const hiddenIds=getHiddenIds();
+  const hiddenEmails=state.emails.filter(e=>hiddenIds.includes(e.id));
+  const hiddenEvents=state.events.filter(e=>hiddenIds.includes(e.name+e.date));
+  let html='';
+  html+=`<div class="private-section">`;
+  html+=`<div class="section-title"><i class="ti ti-mail-off"></i> ${state.lang==='fr'?'Emails masqués':'Hidden emails'} <span class="hidden-badge">${hiddenEmails.length}</span></div>`;
+  if(hiddenEmails.length){
+    html+=`<div class="email-list">`;
+    hiddenEmails.forEach((e,i)=>{
+      html+=`<div class="private-item">${avatarHTML(e.from,i)}<div class="private-item-info"><div class="private-item-title">${e.subject}</div><div class="private-item-sub">${(e.from.split('<')[0].trim()||e.from).slice(0,30)}</div></div><button class="unhide-btn" onclick="toggleHide('${e.id}')"><i class="ti ti-eye"></i></button></div>`;
+    });
+    html+=`</div>`;
+  } else {
+    html+=`<div class="empty-state" style="padding:20px"><i class="ti ti-shield-check"></i><p style="font-size:13px">${state.lang==='fr'?'Aucun email masqué.<br>Appui long sur un email pour le masquer.':'No hidden emails.<br>Long press an email to hide it.'}</p></div>`;
+  }
+  html+=`</div>`;
+
+  html+=`<div class="private-section">`;
+  html+=`<div class="section-title"><i class="ti ti-calendar-off"></i> ${state.lang==='fr'?'Évènements masqués':'Hidden events'} <span class="hidden-badge">${hiddenEvents.length}</span></div>`;
+  if(hiddenEvents.length){
+    html+=`<div class="cal-card">`;
+    hiddenEvents.forEach(ev=>{
+      const eid=ev.name+ev.date;
+      html+=`<div class="private-item"><div class="cal-dot"></div><div class="private-item-info"><div class="private-item-title">${ev.name}</div><div class="private-item-sub">${ev.date?new Date(ev.date).toLocaleDateString(state.lang==='fr'?'fr-FR':'en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div></div><button class="unhide-btn" onclick="toggleHide('${eid}')"><i class="ti ti-eye"></i></button></div>`;
+    });
+    html+=`</div>`;
+  } else {
+    html+=`<div class="empty-state" style="padding:20px"><i class="ti ti-shield-check"></i><p style="font-size:13px">${state.lang==='fr'?'Aucun évènement masqué.<br>Appui long sur un évènement pour le masquer.':'No hidden events.<br>Long press an event to hide it.'}</p></div>`;
+  }
+  html+=`</div>`;
+
+  html+=`<button class="btn-full btn-red" style="margin-top:8px" onclick="lockPrivate()"><i class="ti ti-lock" style="margin-right:6px"></i>${state.lang==='fr'?'Verrouiller':'Lock'}</button>`;
+  return html;
+}
+
+function lockPrivate(){
+  privateUnlocked=false;
+  switchTab('dashboard',document.querySelector('.tab'));
+}
+
 async function init(){
   applyTheme(state.theme);
   updateStaticTranslations();
